@@ -1,6 +1,8 @@
-import flet as ft
+from flask import Flask, render_template, request, redirect, url_for
 
-# Данные
+app = Flask(__name__)
+
+# Данные для монет и бирж
 coins = ["BTC", "USDT", "ETH", "USDC", "ATOM", "XRP", "XLM", "UNI", "TRX", "SOL",
          "SHIB", "NEAR", "LTC", "LINK", "ETC", "EOS", "DOT", "DOGE", "BCH",
          "AVAX", "APE", "ADA", "OP", "ARB", "POL", "AXS", "ASTR", "ENA",
@@ -15,46 +17,18 @@ coins = ["BTC", "USDT", "ETH", "USDC", "ATOM", "XRP", "XLM", "UNI", "TRX", "SOL"
 
 exchanges = ["Binance", "Bitget", "Mexc", "Gate", "Okx", "Whitebit"]
 
-# Создание приложения
-def main(page: ft.Page):
-    page.title = "Cryptocurrency Aggregator"
-    page.theme_mode = ft.ThemeMode.DARK
-    page.background_color = ft.colors.BLACK
-    page.padding = 20
+# Хранение процентных ставок
+staking_rates = {coin: {exchange: "" for exchange in exchanges} for coin in coins}
 
-    # Заголовок
-    page.add(ft.Text(value="Cryptocurrency Aggregator", size=24, weight="bold", color=ft.colors.WHITE, align=ft.Alignment.CENTER))
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        coin = request.form['coin']
+        exchange = request.form['exchange']
+        rate = request.form['rate']
+        staking_rates[coin][exchange] = rate
+        return redirect(url_for('index'))
+    return render_template('index.html', coins=coins, exchanges=exchanges, staking_rates=staking_rates)
 
-    # Таблица
-    table = ft.DataTable(
-        border_color=ft.colors.WHITE,
-        columns=[
-            ft.DataColumn(ft.Text("", color=ft.colors.WHITE))  # Пустой заголовок для первого столбца
-        ] + [ft.DataColumn(ft.Text(exchange, color=ft.colors.WHITE)) for exchange in exchanges],
-        rows=[]
-    )
-
-    # Заполнение таблицы
-    for coin in coins:
-        cells = [ft.DataCell(ft.Text(coin, color=ft.colors.WHITE))]
-        for exchange in exchanges:
-            cell = ft.DataCell(ft.Text("", color=ft.colors.WHITE))
-            cells.append(cell)
-        table.rows.append(ft.DataRow(cells=cells))
-
-    page.add(table)
-
-    # Функция для обновления процентных ставок
-    def update_staking_rate(coin, exchange, rate):
-        for row in table.rows:
-            if row.cells[0].content.value == coin:
-                for cell in row.cells[1:]:
-                    if cell.content.value == exchange:
-                        cell.content.value = rate
-                        page.update()
-
-    # Пример обновления процентной ставки
-    update_staking_rate("BTC", "Binance", "5.0%")
-
-# Запуск приложения
-ft.app(target=main)
+if __name__ == "__main__":
+    app.run(debug=True)
