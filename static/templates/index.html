@@ -1,25 +1,45 @@
-from flask import Flask, render_template
-
-app = Flask(__name__)
-
-# Данные для монет и бирж
-coins = ["BTC", "USDT", "ETH", "USDC", "ATOM", "XRP", "XLM", "UNI", "TRX", "SOL",
-         "SHIB", "NEAR", "LTC", "LINK", "ETC", "EOS", "DOT", "DOGE", "BCH",
-         "AVAX", "APE", "ADA", "OP", "ARB", "POL", "AXS", "ASTR", "ENA",
-         "JUP", "DAI", "INJ", "APT", "FLOKI", "KAVA", "REZ", "MANA", "TAO",
-         "ZEC", "ACE", "IO", "FLOW", "BB", "FIL", "SEI", "DYM", "DYDX",
-         "ICP", "STORJ", "AEVO", "STRK", "MKR", "ETHFI", "NOT", "ZETA", "GRT",
-         "SUI", "AI", "W", "ZK", "PEOPLE", "CHZ", "HBAR", "FTM", "AAVE", "BOME",
-         "TON", "MANTA", "TRB", "ARKM", "CRV", "LDO", "SUSHI", "SNX", "OMNI",
-         "THETA", "AR", "SAND", "PENDLE", "ALGO", "RUNE", "GALA", "MEME",
-         "JASMY", "ZRO", "WIF", "BONK", "PEPE", "USDE", "BWB", "CORE", "ONDO",
-         "TIA", "BGB", "EIGEN", "LUNA", "BNB", "LUNC"]
-
-exchanges = ["Binance", "Bitget", "Mexc", "Gate", "Okx", "Whitebit"]
-
-@app.route('/')
-def index():
-    return render_template('index.html', coins=coins, exchanges=exchanges)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptocurrency Aggregator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Cryptocurrency Aggregator</h1>
+        <div class="table-responsive">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Coin</th>
+                        {% for exchange in exchanges %}
+                        <th>{{ exchange }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for coin in coins %}
+                    <tr>
+                        <td>{{ coin }}</td>
+                        {% for exchange in exchanges %}
+                        <td class="staking-rate">
+                            <form method="POST">
+                                <input type="hidden" name="coin" value="{{ coin }}">
+                                <input type="hidden" name="exchange" value="{{ exchange }}">
+                                <input type="number" step="0.01" class="form-control" name="rate" value="{{ staking_rates[coin][exchange] }}" placeholder="0%">
+                                <button type="submit" class="btn btn-primary mt-2">Update</button>
+                            </form>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
